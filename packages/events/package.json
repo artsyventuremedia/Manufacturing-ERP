@@ -1,0 +1,35 @@
+{
+  "name": "@manuling/events",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Eventing infrastructure: CloudEvents envelope, transactional outbox writer, relay, event-bus port (Kafka / in-memory), idempotent consumers (ADR-0007).",
+  "type": "module",
+  "exports": {
+    ".": {
+      "@manuling/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:integration": "vitest run --config vitest.integration.config.ts"
+  },
+  "dependencies": {
+    "@confluentinc/kafka-javascript": "^1.10.1",
+    "@manuling/db": "workspace:*",
+    "@manuling/kernel": "workspace:*",
+    "drizzle-orm": "^0.45.3",
+    "pg": "^8.23.0"
+  },
+  "devDependencies": {
+    "@manuling/testing": "workspace:*",
+    "@types/pg": "^8.23.1"
+  }
+}

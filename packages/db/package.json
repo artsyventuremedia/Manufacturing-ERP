@@ -1,0 +1,34 @@
+{
+  "name": "@manuling/db",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Database foundation: UnitOfWork with tenant context, RLS helpers, ledger guards, migrations, error mapping (ADR-0004/0005/0006).",
+  "type": "module",
+  "exports": {
+    ".": {
+      "@manuling/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "migrations"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:integration": "vitest run --config vitest.integration.config.ts"
+  },
+  "dependencies": {
+    "@manuling/kernel": "workspace:*",
+    "drizzle-orm": "^0.45.3",
+    "pg": "^8.23.0"
+  },
+  "devDependencies": {
+    "@manuling/testing": "workspace:*",
+    "@types/pg": "^8.23.1"
+  }
+}

@@ -1,0 +1,80 @@
+# Local development stack (ADR-0003). Dev-only credentials; never reuse outside localhost.
+# Usage: pnpm dev:stack  → then `pnpm --filter @manuling/core migrate` and `pnpm dev`.
+name: manuling-dev
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg18
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: manuling
+    ports: ['5432:5432']
+    volumes:
+      - pgdata:/var/lib/postgresql
+      - ../postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 5s
+      retries: 20
+
+  kafka:
+    image: apache/kafka:4.1.0
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'false'
+    ports: ['9092:9092']
+
+  temporal:
+    # Single-binary dev server (SQLite). Production uses the Helm chart on Postgres (ADR-0010).
+    image: temporalio/temporal:latest
+    command: ['server', 'start-dev', '--ip', '0.0.0.0', '--db-filename', '/data/temporal.db']
+    ports: ['7233:7233', '8233:8233']
+    volumes: [temporaldata:/data]
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.4
+    command: ['start-dev', '--import-realm']
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: postgres
+      KC_DB_PASSWORD: postgres
+      KC_HEALTH_ENABLED: 'true'
+    ports: ['8080:8080']
+    volumes:
+      - ../keycloak/realm-manuling.json:/opt/keycloak/data/import/realm-manuling.json:ro
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  valkey:
+    image: valkey/valkey:8
+    ports: ['6379:6379']
+
+  object-store:
+    # S3-compatible storage (ADR-0003: SeaweedFS for on-prem/dev).
+    image: chrislusf/seaweedfs:latest
+    command: ['server', '-s3', '-dir=/data']
+    ports: ['8333:8333']
+    volumes: [objdata:/data]
+
+  observability:
+    # OpenTelemetry collector + Grafana, Prometheus, Loki, Tempo in one dev image.
+    image: grafana/otel-lgtm:latest
+    ports: ['3001:3000', '4317:4317', '4318:4318']
+
+volumes:
+  pgdata:
+  temporaldata:
+  objdata:

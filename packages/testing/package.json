@@ -1,0 +1,30 @@
+{
+  "name": "@manuling/testing",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Test helpers: ephemeral PostgreSQL (embedded, no Docker), tenant fixtures.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "@manuling/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "embedded-postgres": "18.4.0-beta.17",
+    "jose": "^6.2.12",
+    "pg": "^8.23.0"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.23.1"
+  }
+}

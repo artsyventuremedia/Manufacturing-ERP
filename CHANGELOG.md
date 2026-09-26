@@ -1,0 +1,39 @@
+# Changelog
+
+All notable changes to this project are documented here. Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [Unreleased]
+
+### Added
+
+- Phase 0 step 0.7 (numbering series):
+  - Platform migration `0003_numbering` (`numbering_series`, `numbering_counter`).
+  - `NumberingPort` (`@manuling/platform/contracts`) for issuing document numbers in-process.
+  - `GET|POST /v1/platform/companies/{companyId}/numbering-series`, `PATCH /v1/platform/numbering-series/{id}`, `POST /v1/platform/numbering-series/{id}/preview` (`platform.numbering.read|manage`).
+  - `UnitOfWork.runIndependent` with a dedicated `independentPool` (prevents pool starvation from nested independent transactions).
+  - Events `platform.NumberingSeriesCreated.v1` / `platform.NumberingSeriesChanged.v1`.
+
+- Phase 0 step 0.6 (audit, outbox, events; ADR-0007):
+  - Foundation migration `0002_audit_outbox`: `audit_log` (append-only, optional hash chain), `outbox` (+ `outbox_relay` role), `inbox`, `dead_letter`.
+  - `AuditTrail` (`@manuling/db`) and new `@manuling/events` package: CloudEvents envelope, `EventOutbox`, `OutboxRelay`, Kafka and in-memory buses, `ConsumerRunner`.
+  - Every platform write records an audit row and a `platform.*` event in the same transaction; permission denials are audited.
+  - `GET /v1/platform/audit-log`, `POST /v1/platform/audit-log/chain`, `GET /v1/platform/audit-log/chain/verification` (`platform.audit.read` / `platform.audit.manage`; Viewer excluded).
+  - core-worker now runs the outbox relay and event consumers (`EVENT_BUS`, `KAFKA_BROKERS`, `DATABASE_RELAY_URL`); migrate grants `RELAY_DB_USER`.
+  - Event contracts exported as JSON Schema to `docs/events/` (`pnpm --filter @manuling/core events:schemas`, checked in CI).
+
+- Architecture baseline: system architecture, context map, Phase 0–1 ERD, monorepo plan (`docs/architecture`).
+- ADRs 0001–0011 (`docs/adr`).
+- PRD (`docs/PRD.md`), status tracker, open questions.
+- ADR-0012: Tally strategy (migration + one-way export bridge).
+
+### Changed
+
+- `is_tenant_admin` replaced by the built-in Owner role (column dropped pre-release); writes now require permissions.
+- Embedded Postgres test helper time-boxes startup and retries on a fresh port.
+
+- ADRs 0002–0012 accepted. ADR-0003 updated: Node 24 LTS, NestJS 12 on Fastify, TypeScript pinned to 5.9, embedded-postgres for integration tests.
+- Idempotency-Key handling moved from step 0.3 to 0.4 (needs tenant context).
+
+- Product named **Manuling**. Package scope `@manuling/*`.
+- First pilot deployment set to SaaS.
+- ADR-0011: GST Compliance Gateway with capability ports; IRIS IRP is the first e-invoice adapter.

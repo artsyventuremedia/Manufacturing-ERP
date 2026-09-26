@@ -1,0 +1,52 @@
+{
+  "name": "@manuling/core",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Manuling modular-monolith host: core-api (HTTP) and core-worker entrypoints (ADR-0002).",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "node --watch --conditions=@manuling/source --import @swc-node/register/esm-register src/main.api.ts",
+    "dev:worker": "node --watch --conditions=@manuling/source --import @swc-node/register/esm-register src/main.worker.ts",
+    "start": "node dist/main.api.js",
+    "start:worker": "node dist/main.worker.js",
+    "openapi": "node --conditions=@manuling/source --import @swc-node/register/esm-register src/openapi/generate.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "migrate": "node --conditions=@manuling/source --import @swc-node/register/esm-register src/migrate.ts",
+    "start:migrate": "node dist/migrate.js",
+    "provision-tenant": "node --conditions=@manuling/source --import @swc-node/register/esm-register src/cli/provision-tenant.ts",
+    "seed:demo": "node --conditions=@manuling/source --import @swc-node/register/esm-register src/cli/seed-demo.ts",
+    "events:schemas": "node --conditions=@manuling/source --import @swc-node/register/esm-register src/cli/export-event-schemas.ts"
+  },
+  "dependencies": {
+    "@asteasolutions/zod-to-openapi": "^9.1.0",
+    "@manuling/db": "workspace:*",
+    "@manuling/events": "workspace:*",
+    "@manuling/http": "workspace:*",
+    "@manuling/kernel": "workspace:*",
+    "@manuling/platform": "workspace:*",
+    "@nestjs/common": "^12.1.0",
+    "@nestjs/core": "^12.1.0",
+    "@nestjs/platform-fastify": "^12.1.0",
+    "fastify": "^5.12.5",
+    "nestjs-pino": "^5.2.0",
+    "pg": "^8.23.0",
+    "pino": "^10.3.1",
+    "pino-http": "^11.0.0",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@manuling/testing": "workspace:*",
+    "@nestjs/testing": "^12.1.0",
+    "@swc-node/register": "^1.12.1",
+    "@swc/core": "^1.16.2",
+    "@types/pg": "^8.23.1",
+    "pino-pretty": "^13.1.3",
+    "unplugin-swc": "^2.0.0"
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "name": "@manuling/http",
+  "version": "0.0.0",
+  "private": true,
+  "description": "HTTP conventions for NestJS/Fastify: RFC 9457 problem details, request context, ETag/If-Match, cursor pagination, Zod validation.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "@manuling/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@asteasolutions/zod-to-openapi": "^9.1.0",
+    "@manuling/kernel": "workspace:*",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@nestjs/common": "^12.1.0",
+    "@nestjs/core": "^12.1.0",
+    "fastify": "^5.12.5",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2"
+  },
+  "peerDependencies": {
+    "@nestjs/common": "^12.1.0",
+    "fastify": "^5.12.5",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2"
+  }
+}

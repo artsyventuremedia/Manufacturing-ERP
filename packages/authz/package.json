@@ -1,0 +1,40 @@
+{
+  "name": "@manuling/authz",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Authorisation primitives: permission registry, @RequirePermission, grant evaluation with scoped ABAC conditions, field policies, segregation of duties (ADR-0009).",
+  "type": "module",
+  "exports": {
+    ".": {
+      "@manuling/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./core": {
+      "@manuling/source": "./src/core/index.ts",
+      "types": "./dist/core/index.d.ts",
+      "default": "./dist/core/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@manuling/kernel": "workspace:*"
+  },
+  "devDependencies": {
+    "@nestjs/common": "^12.1.0",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2"
+  },
+  "peerDependencies": {
+    "@nestjs/common": "^12.1.0",
+    "reflect-metadata": "^0.2.2"
+  }
+}

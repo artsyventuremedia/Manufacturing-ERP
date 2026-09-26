@@ -1,0 +1,70 @@
+[
+  {
+    "type": "platform.CompanyChanged.v1",
+    "file": "platform.CompanyChanged.v1.json"
+  },
+  {
+    "type": "platform.CompanyCreated.v1",
+    "file": "platform.CompanyCreated.v1.json"
+  },
+  {
+    "type": "platform.FiscalYearOpened.v1",
+    "file": "platform.FiscalYearOpened.v1.json"
+  },
+  {
+    "type": "platform.NumberingSeriesChanged.v1",
+    "file": "platform.NumberingSeriesChanged.v1.json"
+  },
+  {
+    "type": "platform.NumberingSeriesCreated.v1",
+    "file": "platform.NumberingSeriesCreated.v1.json"
+  },
+  {
+    "type": "platform.PlantChanged.v1",
+    "file": "platform.PlantChanged.v1.json"
+  },
+  {
+    "type": "platform.PlantCreated.v1",
+    "file": "platform.PlantCreated.v1.json"
+  },
+  {
+    "type": "platform.RoleChanged.v1",
+    "file": "platform.RoleChanged.v1.json"
+  },
+  {
+    "type": "platform.RoleCreated.v1",
+    "file": "platform.RoleCreated.v1.json"
+  },
+  {
+    "type": "platform.RoleFieldPoliciesReplaced.v1",
+    "file": "platform.RoleFieldPoliciesReplaced.v1.json"
+  },
+  {
+    "type": "platform.SodRuleChanged.v1",
+    "file": "platform.SodRuleChanged.v1.json"
+  },
+  {
+    "type": "platform.TenantProvisioned.v1",
+    "file": "platform.TenantProvisioned.v1.json"
+  },
+  {
+    "type": "platform.UserActivated.v1",
+    "file": "platform.UserActivated.v1.json"
+  },
+  {
+    "type": "platform.UserChanged.v1",
+    "file": "platform.UserChanged.v1.json"
+  },
+  {
+    "type": "platform.UserInvited.v1",
+    "file": "platform.UserInvited.v1.json"
+  },
+  {
+    "type": "platform.UserRoleAssigned.v1",
+    "file": "platform.UserRoleAssigned.v1.json"
+  },
+  {
+    "type": "platform.UserRoleRevoked.v1",
+    "file": "platform.UserRoleRevoked.v1.json"
+  }
+]

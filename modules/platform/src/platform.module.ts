@@ -1,0 +1,84 @@
+import { type DynamicModule, Module } from '@nestjs/common';
+import { APP_GUARD, APP_INTERCEPTOR, DiscoveryModule } from '@nestjs/core';
+import { AccessDenialInterceptor } from './api/access-denial.interceptor.js';
+import { AuditController } from './api/audit.controller.js';
+import { AuthenticationGuard } from './api/authentication.guard.js';
+import { AuthorisationController } from './api/authorisation.controller.js';
+import { IdempotencyInterceptor } from './api/idempotency.interceptor.js';
+import { MeController } from './api/me.controller.js';
+import { NumberingController } from './api/numbering.controller.js';
+import { OrganisationController } from './api/organisation.controller.js';
+import { RequestContextInterceptor } from './api/request-context.interceptor.js';
+import { RouteAccessCheck } from './api/route-access.check.js';
+import { AuditService } from './application/audit.service.js';
+import { Authenticator } from './application/authenticator.js';
+import { AuthorisationService } from './application/authorisation.service.js';
+import { ChangeLog } from './application/change-log.js';
+import { IdempotencyService } from './application/idempotency.service.js';
+import { IdentityService } from './application/identity.service.js';
+import { NumberingService } from './application/numbering.service.js';
+import { OrganisationService } from './application/organisation.service.js';
+import { ProvisioningService } from './application/provisioning.service.js';
+import { TOKEN_VERIFIER } from './application/token-verifier.js';
+import { AccessLoader } from './authorisation/access-loader.js';
+import { NUMBERING_PORT } from './contracts/numbering.js';
+import './authorisation/permissions.js';
+import { AuthorisationRepository } from './infrastructure/authorisation.repository.js';
+import { IdentityRepository } from './infrastructure/identity.repository.js';
+import { NumberingRepository } from './infrastructure/numbering.repository.js';
+import { OidcTokenVerifier } from './infrastructure/oidc-token-verifier.js';
+import { OrganisationRepository } from './infrastructure/organisation.repository.js';
+import { PLATFORM_OPTIONS, type PlatformOptions } from './platform.options.js';
+
+/**
+ * Platform bounded context. Registers the global authentication/authorisation guard, the
+ * context → access-denial → idempotency interceptors (in that order), and the boot-time
+ * check that every route declares an access rule. Requires UnitOfWork, AuditTrail and
+ * EventOutbox from the host's DatabaseModule.
+ */
+@Module({})
+export class PlatformModule {
+  static forRoot(options: PlatformOptions): DynamicModule {
+    return {
+      module: PlatformModule,
+      // Global so other modules can inject the platform ports (e.g. NUMBERING_PORT).
+      global: true,
+      imports: [DiscoveryModule],
+      controllers: [
+        MeController,
+        OrganisationController,
+        AuthorisationController,
+        AuditController,
+        NumberingController,
+      ],
+      providers: [
+        { provide: PLATFORM_OPTIONS, useValue: options },
+        {
+          provide: TOKEN_VERIFIER,
+          useValue: options.tokenVerifier ?? new OidcTokenVerifier(options.oidc),
+        },
+        IdentityRepository,
+        OrganisationRepository,
+        AuthorisationRepository,
+        AccessLoader,
+        ChangeLog,
+        AuditService,
+        Authenticator,
+        AuthorisationService,
+        RouteAccessCheck,
+        IdentityService,
+        OrganisationService,
+        IdempotencyService,
+        ProvisioningService,
+        NumberingRepository,
+        NumberingService,
+        { provide: NUMBERING_PORT, useExisting: NumberingService },
+        { provide: APP_GUARD, useClass: AuthenticationGuard },
+        { provide: APP_INTERCEPTOR, useClass: RequestContextInterceptor },
+        { provide: APP_INTERCEPTOR, useClass: AccessDenialInterceptor },
+        { provide: APP_INTERCEPTOR, useClass: IdempotencyInterceptor },
+      ],
+      exports: [ProvisioningService, NUMBERING_PORT],
+    };
+  }
+}
