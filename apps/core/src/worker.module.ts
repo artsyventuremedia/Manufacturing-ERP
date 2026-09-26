@@ -52,7 +52,13 @@ class WorkerRuntime implements OnApplicationBootstrap, OnApplicationShutdown {
       throw new Error('Invalid configuration: DATABASE_RELAY_URL is required for core-worker');
     }
     if (bus === 'kafka') {
-      const options = { brokers: kafkaBrokers, clientId: 'manuling-core-worker' };
+      const options = {
+        brokers: kafkaBrokers,
+        clientId: 'manuling-core-worker',
+        autoCreateTopics: this.config.events.kafkaAutoCreateTopics,
+        topicPartitions: this.config.events.kafkaTopicPartitions,
+        replicationFactor: this.config.events.kafkaReplicationFactor,
+      };
       this.publisher = new KafkaEventPublisher(options);
       this.subscriber = new KafkaEventSubscriber(options);
     } else {

@@ -27,6 +27,10 @@ const envSchema = z.object({
   EVENT_BUS: z.enum(['kafka', 'memory']).default('memory'),
   /** Comma-separated host:port list; required when EVENT_BUS=kafka. */
   KAFKA_BROKERS: z.string().optional(),
+  /** Create missing topics on first use. Default: on outside production (topics are infra-managed there). */
+  KAFKA_AUTO_CREATE_TOPICS: z.stringbool().optional(),
+  KAFKA_TOPIC_PARTITIONS: z.coerce.number().int().min(1).max(1000).default(6),
+  KAFKA_REPLICATION_FACTOR: z.coerce.number().int().min(1).max(10).default(1),
   /** Worker only: login role that is a member of outbox_relay (reads all tenants' outbox). */
   DATABASE_RELAY_URL: z
     .string()
@@ -56,6 +60,9 @@ export interface AppConfig {
   readonly events: {
     readonly bus: 'kafka' | 'memory';
     readonly kafkaBrokers: readonly string[];
+    readonly kafkaAutoCreateTopics: boolean;
+    readonly kafkaTopicPartitions: number;
+    readonly kafkaReplicationFactor: number;
     readonly relayDatabaseUrl: string | undefined;
   };
   readonly log: { readonly level: z.infer<typeof logLevel>; readonly pretty: boolean };
@@ -113,7 +120,14 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
       audience: e.OIDC_AUDIENCE,
       tenantBaseDomain: e.TENANT_BASE_DOMAIN,
     },
-    events: { bus: e.EVENT_BUS, kafkaBrokers, relayDatabaseUrl: e.DATABASE_RELAY_URL },
+    events: {
+      bus: e.EVENT_BUS,
+      kafkaBrokers,
+      kafkaAutoCreateTopics: e.KAFKA_AUTO_CREATE_TOPICS ?? e.NODE_ENV !== 'production',
+      kafkaTopicPartitions: e.KAFKA_TOPIC_PARTITIONS,
+      kafkaReplicationFactor: e.KAFKA_REPLICATION_FACTOR,
+      relayDatabaseUrl: e.DATABASE_RELAY_URL,
+    },
     log: { level: e.LOG_LEVEL, pretty: e.LOG_PRETTY },
     i18n: {
       supportedLocales,

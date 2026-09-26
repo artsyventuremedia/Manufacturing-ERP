@@ -1,6 +1,6 @@
 import { parseArgs } from 'node:util';
 import { ConflictError } from '@manuling/kernel';
-import { currentFiscalYearStart, provisionTenant } from './provisioning.js';
+import { cliArgs, currentFiscalYearStart, provisionTenant } from './provisioning.js';
 
 /**
  * Seeds the demo workspace "Mysuru Precision Components Pvt. Ltd." (PRD §17) with slug
@@ -8,6 +8,7 @@ import { currentFiscalYearStart, provisionTenant } from './provisioning.js';
  *   pnpm --filter @manuling/core seed:demo -- --admin-sub <keycloak-sub-of-demo-admin>
  */
 const { values } = parseArgs({
+  args: cliArgs(),
   options: {
     'admin-sub': { type: 'string' },
     'admin-email': { type: 'string', default: 'admin@mysuruprecision.example' },

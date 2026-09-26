@@ -6,6 +6,9 @@ All notable changes to this project are documented here. Format: [Keep a Changel
 
 ### Added
 
+- Local container runtime without admin rights (Colima + Docker CLI + Compose, GitHub CLI, Temporal CLI in `~/.local/bin`); full dev stack verified end to end.
+- Kafka adapter: optional topic auto-creation (`KAFKA_AUTO_CREATE_TOPICS`, `KAFKA_TOPIC_PARTITIONS`, `KAFKA_REPLICATION_FACTOR`); real-broker test (`KAFKA_TEST_BROKERS`) running in CI with a Kafka service container.
+
 - Phase 0 step 0.7 (numbering series):
   - Platform migration `0003_numbering` (`numbering_series`, `numbering_counter`).
   - `NumberingPort` (`@manuling/platform/contracts`) for issuing document numbers in-process.
@@ -27,6 +30,9 @@ All notable changes to this project are documented here. Format: [Keep a Changel
 - ADR-0012: Tally strategy (migration + one-way export bridge).
 
 ### Changed
+
+- Dev Temporal pinned to `temporalio/temporal:1.9.1` with a health check; fixed its SQLite volume permissions.
+- `provision-tenant` / `seed:demo` accept pnpm's forwarded `--` separator.
 
 - `is_tenant_admin` replaced by the built-in Owner role (column dropped pre-release); writes now require permissions.
 - Embedded Postgres test helper time-boxes startup and retries on a fresh port.

@@ -1,6 +1,6 @@
 import { parseArgs } from 'node:util';
 import { DomainError } from '@manuling/kernel';
-import { currentFiscalYearStart, provisionTenant } from './provisioning.js';
+import { cliArgs, currentFiscalYearStart, provisionTenant } from './provisioning.js';
 
 /**
  * Operator CLI: create a workspace with its first company, plant, fiscal year and admin.
@@ -9,6 +9,7 @@ import { currentFiscalYearStart, provisionTenant } from './provisioning.js';
  *     --admin-sub <keycloak-sub> --admin-email owner@acme.in --admin-name "Owner"
  */
 const { values } = parseArgs({
+  args: cliArgs(),
   options: {
     slug: { type: 'string' },
     name: { type: 'string' },

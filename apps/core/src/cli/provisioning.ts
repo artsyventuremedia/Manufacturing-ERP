@@ -34,3 +34,11 @@ export function currentFiscalYearStart(
   const date = LocalDate.fromInstant(today, timezone);
   return date.month >= startMonth ? date.year : date.year - 1;
 }
+
+/**
+ * Command-line arguments for parseArgs. `pnpm run x -- --flag` forwards the literal `--`
+ * (pnpm 11), which parseArgs would treat as the start of positionals.
+ */
+export function cliArgs(argv: readonly string[] = process.argv.slice(2)): string[] {
+  return argv[0] === '--' ? argv.slice(1) : [...argv];
+}

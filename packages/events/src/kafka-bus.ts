@@ -10,26 +10,83 @@ import {
 export interface KafkaOptions {
   readonly brokers: readonly string[];
   readonly clientId: string;
+  /**
+   * Create missing topics before first use (development, CI, small on-prem installs). In
+   * managed clusters topics are provisioned by infrastructure and this stays off.
+   */
+  readonly autoCreateTopics?: boolean;
+  /** Partitions for auto-created topics; ordering is per partition key (tenant:aggregate). */
+  readonly topicPartitions?: number;
+  /** Replication factor for auto-created topics (1 for a single dev broker, 3 in production). */
+  readonly replicationFactor?: number;
+}
+
+function client(options: KafkaOptions): KafkaJS.Kafka {
+  return new KafkaJS.Kafka({
+    kafkaJS: {
+      brokers: [...options.brokers],
+      clientId: options.clientId,
+      logLevel: KafkaJS.logLevel.WARN,
+    },
+  });
+}
+
+/** Creates the topics that do not exist yet; idempotent and safe to race. */
+class TopicProvisioner {
+  private readonly known = new Set<string>();
+
+  constructor(
+    private readonly kafka: KafkaJS.Kafka,
+    private readonly options: KafkaOptions,
+  ) {}
+
+  async ensure(topics: Iterable<string>): Promise<void> {
+    if (!this.options.autoCreateTopics) return;
+    const wanted = [...new Set(topics)].filter((t) => !this.known.has(t));
+    if (wanted.length === 0) return;
+    const admin = this.kafka.admin();
+    await admin.connect();
+    try {
+      const existing = new Set(await admin.listTopics());
+      const missing = wanted.filter((t) => !existing.has(t));
+      if (missing.length > 0) {
+        try {
+          await admin.createTopics({
+            topics: missing.map((topic) => ({
+              topic,
+              numPartitions: this.options.topicPartitions ?? 6,
+              replicationFactor: this.options.replicationFactor ?? 1,
+            })),
+          });
+        } catch (err) {
+          // Another process created it first.
+          if (!/already exists/i.test(String((err as Error).message))) throw err;
+        }
+      }
+      for (const t of wanted) this.known.add(t);
+    } finally {
+      await admin.disconnect();
+    }
+  }
 }
 
 /**
  * Kafka adapter on Confluent's librdkafka client (KafkaJS-compatible API). Idempotent
  * producer with acks=all, so a resolved publish is durable and not duplicated by retries.
- * NOTE: not exercised against a live broker in this repository's local test run (no
- * Docker); CI and the dev stack cover it.
  */
 export class KafkaEventPublisher implements EventPublisher {
   private readonly producer: KafkaJS.Producer;
+  private readonly topics: TopicProvisioner;
   private connected: Promise<void> | undefined;
 
   constructor(options: KafkaOptions) {
-    const kafka = new KafkaJS.Kafka({
-      kafkaJS: { brokers: [...options.brokers], clientId: options.clientId },
-    });
+    const kafka = client(options);
+    this.topics = new TopicProvisioner(kafka, options);
     this.producer = kafka.producer({ kafkaJS: { idempotent: true, acks: -1 } });
   }
 
   async publish(messages: readonly EventMessage[]): Promise<void> {
+    if (messages.length === 0) return;
     this.connected ??= this.producer.connect();
     await this.connected;
     const byTopic = new Map<
@@ -45,6 +102,7 @@ export class KafkaEventPublisher implements EventPublisher {
       });
       byTopic.set(m.topic, list);
     }
+    await this.topics.ensure(byTopic.keys());
     await this.producer.sendBatch({
       topicMessages: [...byTopic].map(([topic, msgs]) => ({ topic, messages: msgs })),
     });
@@ -57,14 +115,17 @@ export class KafkaEventPublisher implements EventPublisher {
 
 export class KafkaEventSubscriber implements EventSubscriber {
   private readonly consumers: KafkaJS.Consumer[] = [];
+  private readonly kafka: KafkaJS.Kafka;
+  private readonly topics: TopicProvisioner;
 
-  constructor(private readonly options: KafkaOptions) {}
+  constructor(options: KafkaOptions) {
+    this.kafka = client(options);
+    this.topics = new TopicProvisioner(this.kafka, options);
+  }
 
   async subscribe(group: string, topics: readonly string[], handler: EventHandler): Promise<void> {
-    const kafka = new KafkaJS.Kafka({
-      kafkaJS: { brokers: [...this.options.brokers], clientId: this.options.clientId },
-    });
-    const consumer = kafka.consumer({
+    await this.topics.ensure(topics);
+    const consumer = this.kafka.consumer({
       kafkaJS: { groupId: group, fromBeginning: true, autoCommit: false },
     });
     await consumer.connect();
