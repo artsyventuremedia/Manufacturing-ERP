@@ -11,3 +11,4 @@ allowBuilds:
   lefthook: true
   '@swc/core': true
   '@confluentinc/kafka-javascript': true
+  protobufjs: false

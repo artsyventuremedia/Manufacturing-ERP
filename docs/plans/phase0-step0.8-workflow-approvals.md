@@ -1,6 +1,6 @@
 # Plan: Phase 0 step 0.8 (workflow and approval engine)
 
-Status: proposed · 2026-09-26 · Implements ADR-0010 (Temporal) and PRD §5.1 (approvals with delegation, escalation and SLAs)
+Status: done · 2026-09-26 (see docs/STATUS.md, ADR-0015) · Implements ADR-0010 (Temporal) and PRD §5.1 (approvals with delegation, escalation and SLAs)
 
 ## Outcome
 

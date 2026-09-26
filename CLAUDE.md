@@ -10,7 +10,7 @@
 
 ## Current phase
 
-Phase 0 (Foundation). Steps 0.1–0.7 are done. Next is 0.8 Workflow/approval engine (Temporal). See docs/STATUS.md.
+Phase 0 (Foundation). Steps 0.1–0.8 are done. Next is 0.9 Custom fields & objects. See docs/STATUS.md.
 
 ## Commands
 
@@ -24,6 +24,7 @@ Phase 0 (Foundation). Steps 0.1–0.7 are done. Next is 0.8 Workflow/approval en
 - Workspace packages resolve to `src/` through the `@manuling/source` export condition. Tests and dev run without a build.
 - Zod schemas that appear in OpenAPI must import `z` from `@manuling/http` (it applies the OpenAPI extension first).
 - Record every write with the module's change log (audit row + outbox event, same transaction). Event payloads are defined in `contracts/events.ts` and validated before append; `.v1` changes must be additive.
+- Approvals: modules call `APPROVAL_PORT.submit(...)` inside their UnitOfWork and react to `platform.ApprovalCompleted.v1`. Temporal workflow code (`modules/platform/src/workflows`) must stay deterministic and import only `@temporalio/workflow` and types; all I/O goes in activities.
 - Document numbers come only from `NUMBERING_PORT.next(...)`, called inside the document's UnitOfWork (gapless series roll back with it). Never generate numbers in module code.
 - `uow.runIndependent` commits separately and uses its own pool; use only for effects that must survive the caller's rollback.
 - Long local test runs: keep the Mac awake (`caffeinate -i pnpm test:integration`); sleep suspends embedded Postgres and looks like a hang.

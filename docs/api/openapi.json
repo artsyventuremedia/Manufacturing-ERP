@@ -3521,6 +3521,485 @@
           }
         }
       }
+    },
+    "/v1/platform/companies/{companyId}/workflows": {
+      "get": {
+        "tags": [
+          "Workflows"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List approval workflows with versions",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "companyId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/v1/platform/companies/{companyId}/workflows/drafts": {
+      "post": {
+        "tags": [
+          "Workflows"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Save a draft flow (creates the workflow if new)",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "companyId",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "docType": {
+                    "type": "string",
+                    "maxLength": 80
+                  },
+                  "name": {
+                    "type": "string",
+                    "maxLength": 200
+                  },
+                  "flow": {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                },
+                "required": [
+                  "docType",
+                  "name",
+                  "flow"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/v1/platform/workflow-versions/{id}/publish": {
+      "post": {
+        "tags": [
+          "Workflows"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Publish a draft version",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/v1/platform/companies/{companyId}/workflows/validate": {
+      "post": {
+        "tags": [
+          "Workflows"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Dry-run a flow against document facts",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "companyId",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "flow": {
+                    "type": "object",
+                    "additionalProperties": {}
+                  },
+                  "attributes": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "maxLength": 500
+                        },
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "plantId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "requesterId": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                },
+                "required": [
+                  "flow",
+                  "attributes"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/v1/platform/approval-tasks": {
+      "get": {
+        "tags": [
+          "Approvals"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "My pending approval tasks (including delegated)",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/v1/platform/approval-tasks/{id}/approve": {
+      "post": {
+        "tags": [
+          "Approvals"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Approve a task",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "comment": {
+                    "type": "string",
+                    "maxLength": 2000
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/v1/platform/approval-tasks/{id}/reject": {
+      "post": {
+        "tags": [
+          "Approvals"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Reject a task (comment required)",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "comment": {
+                    "type": "string",
+                    "maxLength": 2000
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/v1/platform/approval-instances/{id}": {
+      "get": {
+        "tags": [
+          "Approvals"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Approval instance with its task timeline",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/v1/platform/approval-instances/{id}/cancel": {
+      "post": {
+        "tags": [
+          "Approvals"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cancel an open approval",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 500
+                  }
+                },
+                "required": [
+                  "reason"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/v1/platform/delegations": {
+      "get": {
+        "tags": [
+          "Approvals"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "My delegations (given and received)",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Approvals"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delegate my approvals for a date range",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "toUserId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "validFrom": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "validTo": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "docTypes": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "maxLength": 80
+                    },
+                    "maxItems": 20
+                  }
+                },
+                "required": [
+                  "toUserId",
+                  "validFrom",
+                  "validTo"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/v1/platform/delegations/{id}/revoke": {
+      "post": {
+        "tags": [
+          "Approvals"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "End a delegation",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
     }
   },
   "webhooks": {}

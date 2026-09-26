@@ -11,3 +11,10 @@ export {
   type NumberRequest,
   type NumberingPort,
 } from './numbering.js';
+export {
+  APPROVAL_PORT,
+  type ApprovalOutcome,
+  type ApprovalPort,
+  type ApprovalRequest,
+  type ApprovalSubmission,
+} from './approvals.js';

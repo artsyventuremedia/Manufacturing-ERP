@@ -78,6 +78,22 @@ const numberingSeries = z.object({
   status: z.enum(['active', 'inactive']),
 });
 
+const approvalRef = {
+  instanceId: z.uuid(),
+  entityType: z.string(),
+  entityId: z.string(),
+  companyId: z.uuid(),
+};
+
+const approvalTask = z.object({
+  ...approvalRef,
+  taskId: z.uuid(),
+  stepId: z.string(),
+  assigneeId: z.uuid(),
+  dueAt: z.iso.datetime().nullable(),
+  escalationLevel: z.number().int(),
+});
+
 export const PLATFORM_EVENTS = {
   'platform.TenantProvisioned.v1': z.object({
     tenantId: z.uuid(),
@@ -107,6 +123,35 @@ export const PLATFORM_EVENTS = {
   'platform.UserRoleRevoked.v1': assignment,
   'platform.NumberingSeriesCreated.v1': numberingSeries,
   'platform.NumberingSeriesChanged.v1': numberingSeries,
+  'platform.ApprovalSubmitted.v1': z.object({
+    ...approvalRef,
+    requesterId: z.uuid(),
+    workflowVersionId: z.uuid(),
+  }),
+  'platform.ApprovalTaskAssigned.v1': approvalTask,
+  'platform.ApprovalReminderDue.v1': approvalTask,
+  'platform.ApprovalEscalated.v1': approvalTask,
+  'platform.ApprovalTaskDecided.v1': z.object({
+    ...approvalRef,
+    taskId: z.uuid(),
+    stepId: z.string(),
+    decision: z.enum(['approved', 'rejected']),
+    decidedBy: z.uuid(),
+    onBehalfOf: z.uuid().nullable(),
+  }),
+  'platform.ApprovalCancelled.v1': z.object({ ...approvalRef, reason: z.string() }),
+  'platform.ApprovalCompleted.v1': z.object({
+    ...approvalRef,
+    outcome: z.enum(['approved', 'rejected', 'cancelled']),
+    reason: z.string().nullable(),
+  }),
+  'platform.WorkflowVersionPublished.v1': z.object({
+    definitionId: z.uuid(),
+    versionId: z.uuid(),
+    companyId: z.uuid(),
+    docType: z.string(),
+    version: z.number().int(),
+  }),
   'platform.SodRuleChanged.v1': z.object({
     id: z.uuid(),
     code: z.string(),

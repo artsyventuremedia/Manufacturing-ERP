@@ -16,3 +16,14 @@ export { OidcTokenVerifier, type OidcOptions } from './infrastructure/oidc-token
 export { platformMigrations } from './migrations.js';
 export { PlatformModule } from './platform.module.js';
 export { type PlatformOptions } from './platform.options.js';
+export {
+  APPROVAL_TASK_QUEUE,
+  ApprovalOrchestrator,
+  approvalWorkflowId,
+  approvalWorkflowsPath,
+} from './application/approval-orchestrator.js';
+export {
+  ApprovalActivities,
+  approvalActivityFunctions,
+  type ApprovalActivityFunctions,
+} from './application/approval.activities.js';

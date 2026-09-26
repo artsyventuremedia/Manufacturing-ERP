@@ -34,6 +34,10 @@
     "@manuling/kernel": "workspace:*",
     "@nestjs/common": "^12.1.0",
     "@nestjs/core": "^12.1.0",
+    "@temporalio/activity": "1.24.0",
+    "@temporalio/client": "1.24.0",
+    "@temporalio/worker": "1.24.0",
+    "@temporalio/workflow": "1.24.0",
     "drizzle-orm": "^0.45.3",
     "fastify": "^5.12.5",
     "jose": "^6.2.12",
@@ -45,6 +49,7 @@
   "devDependencies": {
     "@manuling/testing": "workspace:*",
     "@swc/core": "^1.16.2",
+    "@temporalio/testing": "1.24.0",
     "@types/pg": "^8.23.1",
     "unplugin-swc": "^2.0.0"
   }

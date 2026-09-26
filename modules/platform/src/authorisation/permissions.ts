@@ -23,11 +23,23 @@ export const PLATFORM_PERMISSIONS = {
   subscriptionManage: 'platform.subscription.manage',
   auditRead: 'platform.audit.read',
   numberingRead: 'platform.numbering.read',
+  workflowRead: 'platform.workflow.read',
+  workflowManage: 'platform.workflow.manage',
   numberingManage: 'platform.numbering.manage',
   auditManage: 'platform.audit.manage',
 } as const;
 
 const definitions: PermissionDefinition[] = [
+  {
+    code: PLATFORM_PERMISSIONS.workflowRead,
+    description: 'View approval workflows and all approval instances',
+    featureKey: core,
+  },
+  {
+    code: PLATFORM_PERMISSIONS.workflowManage,
+    description: 'Design and publish approval workflows; cancel any approval',
+    featureKey: core,
+  },
   {
     code: PLATFORM_PERMISSIONS.numberingRead,
     description: 'View document numbering series',

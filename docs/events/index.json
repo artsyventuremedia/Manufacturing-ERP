@@ -1,5 +1,33 @@
 [
   {
+    "type": "platform.ApprovalCancelled.v1",
+    "file": "platform.ApprovalCancelled.v1.json"
+  },
+  {
+    "type": "platform.ApprovalCompleted.v1",
+    "file": "platform.ApprovalCompleted.v1.json"
+  },
+  {
+    "type": "platform.ApprovalEscalated.v1",
+    "file": "platform.ApprovalEscalated.v1.json"
+  },
+  {
+    "type": "platform.ApprovalReminderDue.v1",
+    "file": "platform.ApprovalReminderDue.v1.json"
+  },
+  {
+    "type": "platform.ApprovalSubmitted.v1",
+    "file": "platform.ApprovalSubmitted.v1.json"
+  },
+  {
+    "type": "platform.ApprovalTaskAssigned.v1",
+    "file": "platform.ApprovalTaskAssigned.v1.json"
+  },
+  {
+    "type": "platform.ApprovalTaskDecided.v1",
+    "file": "platform.ApprovalTaskDecided.v1.json"
+  },
+  {
     "type": "platform.CompanyChanged.v1",
     "file": "platform.CompanyChanged.v1.json"
   },
@@ -66,5 +94,9 @@
   {
     "type": "platform.UserRoleRevoked.v1",
     "file": "platform.UserRoleRevoked.v1.json"
+  },
+  {
+    "type": "platform.WorkflowVersionPublished.v1",
+    "file": "platform.WorkflowVersionPublished.v1.json"
   }
 ]

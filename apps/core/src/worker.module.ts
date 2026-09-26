@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import { UnitOfWork, createPool } from '@manuling/db';
 import {
   ConsumerRunner,
@@ -10,6 +11,14 @@ import {
   OutboxRelay,
 } from '@manuling/events';
 import {
+  APPROVAL_TASK_QUEUE,
+  ApprovalActivities,
+  ApprovalOrchestrator,
+  PlatformModule,
+  approvalActivityFunctions,
+  approvalWorkflowsPath,
+} from '@manuling/platform/module';
+import {
   type DynamicModule,
   Inject,
   Injectable,
@@ -18,6 +27,8 @@ import {
   type OnApplicationBootstrap,
   type OnApplicationShutdown,
 } from '@nestjs/common';
+import { Client, Connection } from '@temporalio/client';
+import { NativeConnection, Worker } from '@temporalio/worker';
 import { LoggerModule } from 'nestjs-pino';
 import type pg from 'pg';
 import { APP_CONFIG, type AppConfig } from './config/config.js';
@@ -28,9 +39,10 @@ import { loggerOptions } from './logger.js';
 export const EVENT_CONSUMERS = Symbol('EVENT_CONSUMERS');
 
 /**
- * core-worker runtime (ADR-0002, ADR-0007): the outbox relay (leader-elected, so any number
- * of worker replicas is safe) and the event consumers of every module.
- * TODO(phase0-step0.8): Temporal workers.
+ * core-worker runtime (ADR-0002, ADR-0007, ADR-0010):
+ * - outbox relay (leader-elected, so any number of worker replicas is safe);
+ * - event consumers of every module, incl. the approval orchestrator (outbox → Temporal);
+ * - the Temporal worker executing approval workflows and their activities.
  */
 @Injectable()
 class WorkerRuntime implements OnApplicationBootstrap, OnApplicationShutdown {
@@ -39,10 +51,14 @@ class WorkerRuntime implements OnApplicationBootstrap, OnApplicationShutdown {
   private relay: OutboxRelay | undefined;
   private publisher: EventPublisher | undefined;
   private subscriber: EventSubscriber | undefined;
+  private temporalWorker: Worker | undefined;
+  private temporalRun: Promise<void> | undefined;
+  private readonly temporalConnections: { close(): Promise<void> }[] = [];
 
   constructor(
     @Inject(APP_CONFIG) private readonly config: AppConfig,
     private readonly uow: UnitOfWork,
+    private readonly approvalActivities: ApprovalActivities,
     @Inject(EVENT_CONSUMERS) private readonly consumers: readonly EventConsumer[],
   ) {}
 
@@ -51,6 +67,22 @@ class WorkerRuntime implements OnApplicationBootstrap, OnApplicationShutdown {
     if (!relayDatabaseUrl) {
       throw new Error('Invalid configuration: DATABASE_RELAY_URL is required for core-worker');
     }
+
+    // Temporal: a client for the orchestrator consumer and a worker for workflows/activities.
+    const { address, namespace } = this.config.temporal;
+    const clientConnection = await Connection.connect({ address });
+    const client = new Client({ connection: clientConnection, namespace });
+    const workerConnection = await NativeConnection.connect({ address });
+    this.temporalConnections.push(clientConnection, workerConnection);
+    this.temporalWorker = await Worker.create({
+      connection: workerConnection,
+      namespace,
+      taskQueue: APPROVAL_TASK_QUEUE,
+      workflowsPath: fileURLToPath(approvalWorkflowsPath),
+      activities: approvalActivityFunctions(this.approvalActivities),
+    });
+    this.temporalRun = this.temporalWorker.run();
+
     if (bus === 'kafka') {
       const options = {
         brokers: kafkaBrokers,
@@ -70,9 +102,8 @@ class WorkerRuntime implements OnApplicationBootstrap, OnApplicationShutdown {
       );
     }
 
-    await new ConsumerRunner(this.uow, this.subscriber, {}, this.pinoAdapter()).start(
-      this.consumers,
-    );
+    const consumers = [new ApprovalOrchestrator(client), ...this.consumers];
+    await new ConsumerRunner(this.uow, this.subscriber, {}, this.pinoAdapter()).start(consumers);
 
     this.relayPool = createPool({
       connectionString: relayDatabaseUrl,
@@ -82,7 +113,7 @@ class WorkerRuntime implements OnApplicationBootstrap, OnApplicationShutdown {
     this.relay = new OutboxRelay(this.relayPool, this.publisher, {}, this.pinoAdapter());
     this.relay.start();
     this.logger.log(
-      `core-worker started: outbox relay on ${bus}, ${this.consumers.length} consumer(s)`,
+      `core-worker started: relay on ${bus}, ${consumers.length} consumer(s), Temporal ${address}/${namespace}`,
     );
   }
 
@@ -91,6 +122,9 @@ class WorkerRuntime implements OnApplicationBootstrap, OnApplicationShutdown {
     await this.relay?.stop();
     await this.subscriber?.close();
     await this.publisher?.close();
+    this.temporalWorker?.shutdown();
+    await this.temporalRun?.catch(() => undefined);
+    await Promise.all(this.temporalConnections.map((c) => c.close()));
     await this.relayPool?.end();
   }
 
@@ -112,6 +146,11 @@ export class WorkerModule {
         ConfigModule.forRoot(config),
         LoggerModule.forRoot(loggerOptions(config)),
         DatabaseModule,
+        PlatformModule.forRoot({
+          oidc: { issuer: config.auth.issuer, audience: config.auth.audience },
+          tenantBaseDomain: config.auth.tenantBaseDomain,
+          supportedLocales: config.i18n.supportedLocales,
+        }),
       ],
       providers: [{ provide: EVENT_CONSUMERS, useValue: consumers }, WorkerRuntime],
     };

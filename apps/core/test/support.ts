@@ -15,6 +15,8 @@ import { type AppConfig, loadConfig } from '../src/config/config.js';
 
 export interface Harness {
   readonly server: EphemeralPostgres;
+  /** Login for the outbox relay role (reads every tenant's outbox). */
+  readonly relayUrl: string;
   readonly adminUrl: string;
   readonly idp: TestIdp;
   readonly config: AppConfig;
@@ -47,7 +49,10 @@ export async function startHarness(
   const adminUrl = await server.createDatabase(database);
   await withClient(adminUrl, async (c) => {
     await new Migrator(c).migrate([foundationMigrations, platformMigrations]);
-    await c.query(`CREATE ROLE mnl_app LOGIN PASSWORD 'app' IN ROLE app_rw`);
+    await c.query(`CREATE ROLE mnl_app LOGIN PASSWORD 'app' IN ROLE app_rw`).catch(() => undefined);
+    await c
+      .query(`CREATE ROLE mnl_relay LOGIN PASSWORD 'relay' IN ROLE outbox_relay`)
+      .catch(() => undefined);
   });
   const idp = await createTestIdp();
   const config = loadConfig({
@@ -70,6 +75,7 @@ export async function startHarness(
 
   return {
     server,
+    relayUrl: server.urlFor(database, 'mnl_relay', 'relay'),
     adminUrl,
     idp,
     config,

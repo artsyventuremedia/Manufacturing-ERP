@@ -6,6 +6,12 @@ All notable changes to this project are documented here. Format: [Keep a Changel
 
 ### Added
 
+- Phase 0 step 0.8 (workflow and approvals, ADR-0015):
+  - Platform migration `0004_approvals`; approval DSL, Temporal workflow `approvalWorkflow` and activities; `ApprovalOrchestrator` consumer (outbox → Temporal).
+  - `APPROVAL_PORT` (`submit`, `cancel`) for modules; outcome event `platform.ApprovalCompleted.v1`.
+  - APIs: workflow drafts, validate (dry run), publish; approval inbox, approve/reject, instance timeline, cancel; delegations.
+  - core-worker hosts the Temporal worker (`TEMPORAL_ADDRESS`, `TEMPORAL_NAMESPACE`).
+
 - Local container runtime without admin rights (Colima + Docker CLI + Compose, GitHub CLI, Temporal CLI in `~/.local/bin`); full dev stack verified end to end.
 - Kafka adapter: optional topic auto-creation (`KAFKA_AUTO_CREATE_TOPICS`, `KAFKA_TOPIC_PARTITIONS`, `KAFKA_REPLICATION_FACTOR`); real-broker test (`KAFKA_TEST_BROKERS`) running in CI with a Kafka service container.
 

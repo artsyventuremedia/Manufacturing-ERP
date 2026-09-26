@@ -31,6 +31,9 @@ const envSchema = z.object({
   KAFKA_AUTO_CREATE_TOPICS: z.stringbool().optional(),
   KAFKA_TOPIC_PARTITIONS: z.coerce.number().int().min(1).max(1000).default(6),
   KAFKA_REPLICATION_FACTOR: z.coerce.number().int().min(1).max(10).default(1),
+  /** Temporal frontend (host:port) and namespace for durable workflows (ADR-0010). */
+  TEMPORAL_ADDRESS: z.string().min(3).default('localhost:7233'),
+  TEMPORAL_NAMESPACE: z.string().min(1).default('default'),
   /** Worker only: login role that is a member of outbox_relay (reads all tenants' outbox). */
   DATABASE_RELAY_URL: z
     .string()
@@ -65,6 +68,7 @@ export interface AppConfig {
     readonly kafkaReplicationFactor: number;
     readonly relayDatabaseUrl: string | undefined;
   };
+  readonly temporal: { readonly address: string; readonly namespace: string };
   readonly log: { readonly level: z.infer<typeof logLevel>; readonly pretty: boolean };
   readonly i18n: {
     readonly supportedLocales: readonly string[];
@@ -128,6 +132,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
       kafkaReplicationFactor: e.KAFKA_REPLICATION_FACTOR,
       relayDatabaseUrl: e.DATABASE_RELAY_URL,
     },
+    temporal: { address: e.TEMPORAL_ADDRESS, namespace: e.TEMPORAL_NAMESPACE },
     log: { level: e.LOG_LEVEL, pretty: e.LOG_PRETTY },
     i18n: {
       supportedLocales,

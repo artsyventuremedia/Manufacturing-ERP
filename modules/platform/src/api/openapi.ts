@@ -1,4 +1,5 @@
 import { type OpenAPIRegistry } from '@manuling/http';
+import { registerApprovalOpenApi } from './approval.controller.js';
 import { registerAuditOpenApi } from './audit.controller.js';
 import { registerAuthorisationOpenApi } from './authorisation.dto.js';
 import { registerOrganisationOpenApi } from './dto.js';
@@ -13,4 +14,5 @@ export function registerPlatformOpenApi(registry: OpenAPIRegistry): void {
   registerAuthorisationOpenApi(registry);
   registerAuditOpenApi(registry);
   registerNumberingOpenApi(registry);
+  registerApprovalOpenApi(registry);
 }

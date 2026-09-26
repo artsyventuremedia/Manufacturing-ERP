@@ -18,3 +18,4 @@ Format: [MADR](https://adr.github.io/madr/)-lite. Statuses: Proposed → Accepte
 | [0012](0012-tally-coexistence-strategy.md)       | Tally: one-time migration + one-way export bridge                       | Accepted |
 | [0013](0013-tenant-resolution-and-membership.md) | Tenant resolution from request, membership in our DB                    | Accepted |
 | [0014](0014-authorisation-model.md)              | Authorisation model (access rules, scopes, templates, SoD, invitations) | Accepted |
+| [0015](0015-approval-engine.md)                  | Approval engine: Postgres truth, Temporal time, outbox hand-offs        | Accepted |
