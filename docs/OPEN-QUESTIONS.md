@@ -43,3 +43,11 @@ Each question lists the **default assumption** I will use if you reply "defaults
 | Q11 | Who provides and reviews **Kannada and Hindi translations** and manufacturing terminology?                                                           | Machine-translated first drafts, reviewed by a native-speaking domain person before each release. Glossary kept in `packages/i18n/glossary` |
 | Q14 | Are there existing **brand guidelines** (logo, colours, typography)?                                                                                 | A neutral design system with tokens, so branding can be applied later                                                                       |
 | Q15 | For the **Starter edition**, should lot/serial tracking and basic production orders be included (the PRD says yes), or held back as a Growth upsell? | Included, as the PRD says                                                                                                                   |
+
+## Brief v2 (2026-09-27)
+
+| #   | Question                                                                                                                                              | Default assumption                                                                        |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Q21 | Which **demo company**: "Artsy Manufacturing Pvt Ltd, Mysuru Plant, Industrial Pump" (brief v2 §97) or "Mysuru Precision Components Pvt. Ltd." (PRD)? | Brief v2's Artsy Manufacturing / Mysuru Plant / Industrial Pump, as the newer instruction |
+| Q22 | Replace the PRD's three editions with brief v2's five (Free trial, Starter, Professional, Enterprise, Enterprise Plus)?                               | Yes, as in docs/architecture/06 §4                                                        |
+| Q23 | Which **speech provider** for voice in Kannada and Hindi (shop floor, copilot, voice notifications)?                                                  | Decide in Phase 3 after an accuracy bake-off                                              |

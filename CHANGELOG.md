@@ -6,6 +6,16 @@ All notable changes to this project are documented here. Format: [Keep a Changel
 
 ### Added
 
+- Brief v2 architecture deliverables (awaiting approval): `docs/BRIEF-v2.md` (the brief as received) and `docs/architecture/05–13`:
+  - gap analysis and deliverables index;
+  - product layers, module map, dependency graph, editions and reconciled roadmap;
+  - AI, security, and data and API architecture;
+  - role matrix and process maps;
+  - UI information architecture;
+  - testing strategy;
+  - risks, bottlenecks and conflicts.
+- Open questions Q21–Q23.
+
 - Phase 0 step 0.9 (custom fields and objects):
   - Platform migration `0005_customisation`; custom field definitions (13 types), custom objects and records, UI layouts.
   - `ext` on companies and plants (validated, merged, filterable with `ext.<field>` / `ext.<field>[gte]`); field policies can target `ext.<field>`.
