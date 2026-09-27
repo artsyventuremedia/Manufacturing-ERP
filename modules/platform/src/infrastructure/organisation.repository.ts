@@ -1,7 +1,7 @@
 import { UnitOfWork } from '@manuling/db';
 import { ConcurrencyConflictError, LocalDate, NotFoundError } from '@manuling/kernel';
 import { Injectable } from '@nestjs/common';
-import { and, asc, eq, gt, inArray, or, sql } from 'drizzle-orm';
+import { type SQL, and, asc, eq, gt, inArray, or, sql } from 'drizzle-orm';
 import { type Company } from '../domain/company.js';
 import { type FiscalYear } from '../domain/fiscal-year.js';
 import { type Plant } from '../domain/plant.js';
@@ -54,6 +54,7 @@ export class OrganisationRepository {
     visibleIds: readonly string[],
     limit: number,
     after?: readonly [string, string],
+    extFilters: readonly SQL[] = [],
   ): Promise<CompanyRecord[]> {
     if (visibleIds.length === 0) return [];
     const rows = await this.db
@@ -62,6 +63,7 @@ export class OrganisationRepository {
       .where(
         and(
           inArray(companyTable.id, [...visibleIds]),
+          ...extFilters,
           after
             ? or(
                 gt(companyTable.code, after[0]),
@@ -82,6 +84,7 @@ export class OrganisationRepository {
         legalName: company.legalName,
         status: company.status,
         fiscalYearStartMonth: company.fiscalYearStartMonth,
+        ext: { ...company.ext },
         version: sql`${companyTable.version} + 1`,
         ...updateStamp(),
       })
@@ -131,6 +134,7 @@ export class OrganisationRepository {
         name: plant.name,
         regionCode: plant.regionCode,
         timezone: plant.timezone,
+        ext: { ...plant.ext },
         status: plant.status,
         version: sql`${plantTable.version} + 1`,
         ...updateStamp(),
@@ -200,6 +204,7 @@ function toCompany(row: typeof companyTable.$inferSelect): CompanyRecord {
     fiscalYearStartMonth: row.fiscalYearStartMonth,
     status: row.status,
     version: row.version,
+    ext: row.ext,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   };
@@ -215,6 +220,7 @@ function toPlant(row: typeof plantTable.$inferSelect): PlantRecord {
     timezone: row.timezone,
     status: row.status,
     version: row.version,
+    ext: row.ext,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   };

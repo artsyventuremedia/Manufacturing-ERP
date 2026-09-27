@@ -16,6 +16,7 @@ export const createCompanyBody = z
     baseCurrency: z.string().length(3),
     countryCode: z.string().length(2),
     fiscalYearStartMonth: z.number().int().min(1).max(12).optional(),
+    ext: z.record(z.string(), z.unknown()).optional(),
   })
   .strict();
 
@@ -24,6 +25,7 @@ export const updateCompanyBody = z
     legalName: z.string().max(200).optional(),
     status: z.enum(['active', 'inactive']).optional(),
     fiscalYearStartMonth: z.number().int().min(1).max(12).optional(),
+    ext: z.record(z.string(), z.unknown()).optional(),
   })
   .strict();
 
@@ -33,6 +35,7 @@ export const createPlantBody = z
     name: z.string().max(200),
     regionCode: z.string().max(6).optional(),
     timezone: z.string().max(64),
+    ext: z.record(z.string(), z.unknown()).optional(),
   })
   .strict();
 
@@ -42,6 +45,7 @@ export const updatePlantBody = z
     regionCode: z.string().max(6).nullable().optional(),
     timezone: z.string().max(64).optional(),
     status: z.enum(['active', 'inactive']).optional(),
+    ext: z.record(z.string(), z.unknown()).optional(),
   })
   .strict();
 
@@ -60,6 +64,7 @@ export const companyResponse = z.object({
   fiscalYearStartMonth: z.number().int(),
   status: z.enum(['active', 'inactive']),
   version: z.number().int(),
+  ext: z.record(z.string(), z.unknown()),
   ...timestamps,
 });
 
@@ -72,6 +77,7 @@ export const plantResponse = z.object({
   timezone: z.string(),
   status: z.enum(['active', 'inactive']),
   version: z.number().int(),
+  ext: z.record(z.string(), z.unknown()),
   ...timestamps,
 });
 
@@ -114,6 +120,7 @@ export function toCompanyResponse(c: CompanyRecord): CompanyResponse {
     fiscalYearStartMonth: c.fiscalYearStartMonth,
     status: c.status,
     version: c.version,
+    ext: { ...c.ext },
     createdAt: c.createdAt.toISOString(),
     updatedAt: c.updatedAt.toISOString(),
   };
@@ -129,6 +136,7 @@ export function toPlantResponse(p: PlantRecord): PlantResponse {
     timezone: p.timezone,
     status: p.status,
     version: p.version,
+    ext: { ...p.ext },
     createdAt: p.createdAt.toISOString(),
     updatedAt: p.updatedAt.toISOString(),
   };

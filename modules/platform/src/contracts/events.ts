@@ -14,6 +14,7 @@ const company = z.object({
   fiscalYearStartMonth: z.number().int(),
   status: z.enum(['active', 'inactive']),
   version: z.number().int(),
+  ext: z.record(z.string(), z.unknown()).optional(),
 });
 
 const plant = z.object({
@@ -25,6 +26,7 @@ const plant = z.object({
   timezone: z.string(),
   status: z.enum(['active', 'inactive']),
   version: z.number().int(),
+  ext: z.record(z.string(), z.unknown()).optional(),
 });
 
 const fiscalYear = z.object({
@@ -94,6 +96,30 @@ const approvalTask = z.object({
   escalationLevel: z.number().int(),
 });
 
+const customField = z.object({
+  id: z.uuid(),
+  entity: z.string(),
+  apiName: z.string(),
+  dataType: z.string(),
+  required: z.boolean(),
+  status: z.enum(['active', 'archived']),
+});
+
+const customObject = z.object({
+  id: z.uuid(),
+  apiName: z.string(),
+  companyScoped: z.boolean(),
+  status: z.enum(['active', 'archived']),
+});
+
+const customRecord = z.object({
+  id: z.uuid(),
+  objectApiName: z.string(),
+  companyId: z.uuid().nullable(),
+  data: z.record(z.string(), z.unknown()),
+  status: z.enum(['active', 'archived']),
+});
+
 export const PLATFORM_EVENTS = {
   'platform.TenantProvisioned.v1': z.object({
     tenantId: z.uuid(),
@@ -152,6 +178,13 @@ export const PLATFORM_EVENTS = {
     docType: z.string(),
     version: z.number().int(),
   }),
+  'platform.CustomFieldDefined.v1': customField,
+  'platform.CustomFieldChanged.v1': customField,
+  'platform.CustomObjectDefined.v1': customObject,
+  'platform.CustomObjectChanged.v1': customObject,
+  'platform.CustomRecordCreated.v1': customRecord,
+  'platform.CustomRecordChanged.v1': customRecord,
+  'platform.CustomRecordArchived.v1': customRecord,
   'platform.SodRuleChanged.v1': z.object({
     id: z.uuid(),
     code: z.string(),

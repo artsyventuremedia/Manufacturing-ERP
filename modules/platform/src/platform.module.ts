@@ -5,6 +5,7 @@ import { ApprovalController } from './api/approval.controller.js';
 import { AuditController } from './api/audit.controller.js';
 import { AuthenticationGuard } from './api/authentication.guard.js';
 import { AuthorisationController } from './api/authorisation.controller.js';
+import { CustomisationController } from './api/customisation.controller.js';
 import { IdempotencyInterceptor } from './api/idempotency.interceptor.js';
 import { MeController } from './api/me.controller.js';
 import { NumberingController } from './api/numbering.controller.js';
@@ -18,6 +19,9 @@ import { AuditService } from './application/audit.service.js';
 import { Authenticator } from './application/authenticator.js';
 import { AuthorisationService } from './application/authorisation.service.js';
 import { ChangeLog } from './application/change-log.js';
+import { CustomRecordService } from './application/custom-record.service.js';
+import { CustomisationService } from './application/customisation.service.js';
+import { ExtensionService } from './application/extensions.js';
 import { IdempotencyService } from './application/idempotency.service.js';
 import { IdentityService } from './application/identity.service.js';
 import { NumberingService } from './application/numbering.service.js';
@@ -31,6 +35,7 @@ import { NUMBERING_PORT } from './contracts/numbering.js';
 import './authorisation/permissions.js';
 import { ApprovalRepository } from './infrastructure/approval.repository.js';
 import { AuthorisationRepository } from './infrastructure/authorisation.repository.js';
+import { CustomisationRepository } from './infrastructure/customisation.repository.js';
 import { IdentityRepository } from './infrastructure/identity.repository.js';
 import { NumberingRepository } from './infrastructure/numbering.repository.js';
 import { OidcTokenVerifier } from './infrastructure/oidc-token-verifier.js';
@@ -58,6 +63,7 @@ export class PlatformModule {
         AuditController,
         NumberingController,
         ApprovalController,
+        CustomisationController,
       ],
       providers: [
         { provide: PLATFORM_OPTIONS, useValue: options },
@@ -70,6 +76,10 @@ export class PlatformModule {
         AuthorisationRepository,
         AccessLoader,
         ChangeLog,
+        CustomisationRepository,
+        ExtensionService,
+        CustomisationService,
+        CustomRecordService,
         AuditService,
         Authenticator,
         AuthorisationService,

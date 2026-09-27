@@ -6,6 +6,12 @@ All notable changes to this project are documented here. Format: [Keep a Changel
 
 ### Added
 
+- Phase 0 step 0.9 (custom fields and objects):
+  - Platform migration `0005_customisation`; custom field definitions (13 types), custom objects and records, UI layouts.
+  - `ext` on companies and plants (validated, merged, filterable with `ext.<field>` / `ext.<field>[gte]`); field policies can target `ext.<field>`.
+  - APIs: `/v1/platform/custom-fields`, `/v1/platform/custom-objects`, `/v1/platform/custom-objects/{apiName}/records` (+ `export.csv`), `/v1/platform/layouts/{entity}/{kind}`.
+  - Permissions `platform.customization.manage`, `platform.custom_record.read|write`; `Custom*` events.
+
 - Phase 0 step 0.8 (workflow and approvals, ADR-0015):
   - Platform migration `0004_approvals`; approval DSL, Temporal workflow `approvalWorkflow` and activities; `ApprovalOrchestrator` consumer (outbox → Temporal).
   - `APPROVAL_PORT` (`submit`, `cancel`) for modules; outcome event `platform.ApprovalCompleted.v1`.

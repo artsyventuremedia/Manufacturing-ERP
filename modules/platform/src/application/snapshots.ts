@@ -17,6 +17,7 @@ export function companySnapshot(c: Company): PlatformEventData<'platform.Company
     fiscalYearStartMonth: c.fiscalYearStartMonth,
     status: c.status,
     version: c.version,
+    ext: { ...c.ext },
   };
 }
 
@@ -30,6 +31,7 @@ export function plantSnapshot(p: Plant): PlatformEventData<'platform.PlantCreate
     timezone: p.timezone,
     status: p.status,
     version: p.version,
+    ext: { ...p.ext },
   };
 }
 

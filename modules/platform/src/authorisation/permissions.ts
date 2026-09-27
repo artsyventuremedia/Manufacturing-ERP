@@ -24,12 +24,30 @@ export const PLATFORM_PERMISSIONS = {
   auditRead: 'platform.audit.read',
   numberingRead: 'platform.numbering.read',
   workflowRead: 'platform.workflow.read',
+  customizationManage: 'platform.customization.manage',
+  customRecordRead: 'platform.custom_record.read',
+  customRecordWrite: 'platform.custom_record.write',
   workflowManage: 'platform.workflow.manage',
   numberingManage: 'platform.numbering.manage',
   auditManage: 'platform.audit.manage',
 } as const;
 
 const definitions: PermissionDefinition[] = [
+  {
+    code: PLATFORM_PERMISSIONS.customizationManage,
+    description: 'Define custom fields, custom objects and layouts',
+    featureKey: core,
+  },
+  {
+    code: PLATFORM_PERMISSIONS.customRecordRead,
+    description: 'View and export custom object records',
+    featureKey: core,
+  },
+  {
+    code: PLATFORM_PERMISSIONS.customRecordWrite,
+    description: 'Create, edit and archive custom object records',
+    featureKey: core,
+  },
   {
     code: PLATFORM_PERMISSIONS.workflowRead,
     description: 'View approval workflows and all approval instances',

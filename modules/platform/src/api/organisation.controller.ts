@@ -51,9 +51,10 @@ export class OrganisationController {
   @RequirePermission(P.companyRead)
   async listCompanies(
     @Query(new ZodPipe(pageQuerySchema)) query: z.output<typeof pageQuerySchema>,
+    @Query() raw: Record<string, unknown>,
   ): Promise<Page<Partial<CompanyResponse>>> {
     const after = query.cursor ? (decodeCursor(query.cursor, 2) as [string, string]) : undefined;
-    const rows = await this.service.listCompanies(query.limit, after);
+    const rows = await this.service.listCompanies(query.limit, after, raw);
     const page = toPage(rows, query.limit, (c) => [c.code, c.id]);
     return { ...page, items: page.items.map(companyOut) };
   }

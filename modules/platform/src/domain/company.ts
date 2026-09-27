@@ -12,6 +12,8 @@ export interface Company {
   readonly fiscalYearStartMonth: number;
   readonly status: CompanyStatus;
   readonly version: number;
+  /** Custom field values (validated against field definitions, step 0.9). */
+  readonly ext: Readonly<Record<string, unknown>>;
 }
 
 export interface NewCompany {
@@ -51,6 +53,7 @@ export function createCompany(input: NewCompany): Company {
         : parseMonth(input.fiscalYearStartMonth, 'fiscalYearStartMonth'),
     status: 'active',
     version: 1,
+    ext: {},
   };
 }
 

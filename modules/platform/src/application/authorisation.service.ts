@@ -61,7 +61,8 @@ export interface SodViolation {
 }
 
 const FIELD_ENTITY = /^[a-z][a-z0-9_]*\.[a-z][a-z0-9_]*$/;
-const FIELD_NAME = /^[a-zA-Z][a-zA-Z0-9]*$/;
+/** Core field (camelCase) or custom field as `ext.<field>` (step 0.9, plan C4). */
+const FIELD_NAME = /^(ext\.)?[a-zA-Z][a-zA-Z0-9]*$/;
 
 /**
  * Roles, users, assignments, field policies and SoD (step 0.5).

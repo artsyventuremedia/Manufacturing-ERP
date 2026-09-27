@@ -27,3 +27,4 @@ export {
   approvalActivityFunctions,
   type ApprovalActivityFunctions,
 } from './application/approval.activities.js';
+export { registerExtensibleEntity, type ExtensibleEntity } from './application/extensions.js';

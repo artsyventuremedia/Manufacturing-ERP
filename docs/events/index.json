@@ -36,6 +36,34 @@
     "file": "platform.CompanyCreated.v1.json"
   },
   {
+    "type": "platform.CustomFieldChanged.v1",
+    "file": "platform.CustomFieldChanged.v1.json"
+  },
+  {
+    "type": "platform.CustomFieldDefined.v1",
+    "file": "platform.CustomFieldDefined.v1.json"
+  },
+  {
+    "type": "platform.CustomObjectChanged.v1",
+    "file": "platform.CustomObjectChanged.v1.json"
+  },
+  {
+    "type": "platform.CustomObjectDefined.v1",
+    "file": "platform.CustomObjectDefined.v1.json"
+  },
+  {
+    "type": "platform.CustomRecordArchived.v1",
+    "file": "platform.CustomRecordArchived.v1.json"
+  },
+  {
+    "type": "platform.CustomRecordChanged.v1",
+    "file": "platform.CustomRecordChanged.v1.json"
+  },
+  {
+    "type": "platform.CustomRecordCreated.v1",
+    "file": "platform.CustomRecordCreated.v1.json"
+  },
+  {
     "type": "platform.FiscalYearOpened.v1",
     "file": "platform.FiscalYearOpened.v1.json"
   },

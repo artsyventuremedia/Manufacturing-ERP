@@ -132,6 +132,10 @@
           "version": {
             "type": "integer"
           },
+          "ext": {
+            "type": "object",
+            "additionalProperties": {}
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -150,6 +154,7 @@
           "fiscalYearStartMonth",
           "status",
           "version",
+          "ext",
           "createdAt",
           "updatedAt"
         ]
@@ -190,6 +195,10 @@
           "version": {
             "type": "integer"
           },
+          "ext": {
+            "type": "object",
+            "additionalProperties": {}
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -208,6 +217,7 @@
           "timezone",
           "status",
           "version",
+          "ext",
           "createdAt",
           "updatedAt"
         ]
@@ -1081,6 +1091,10 @@
                     "type": "integer",
                     "minimum": 1,
                     "maximum": 12
+                  },
+                  "ext": {
+                    "type": "object",
+                    "additionalProperties": {}
                   }
                 },
                 "required": [
@@ -1284,6 +1298,10 @@
                     "type": "integer",
                     "minimum": 1,
                     "maximum": 12
+                  },
+                  "ext": {
+                    "type": "object",
+                    "additionalProperties": {}
                   }
                 },
                 "additionalProperties": false
@@ -1473,6 +1491,10 @@
                   "timezone": {
                     "type": "string",
                     "maxLength": 64
+                  },
+                  "ext": {
+                    "type": "object",
+                    "additionalProperties": {}
                   }
                 },
                 "required": [
@@ -1651,6 +1673,10 @@
                       "active",
                       "inactive"
                     ]
+                  },
+                  "ext": {
+                    "type": "object",
+                    "additionalProperties": {}
                   }
                 },
                 "additionalProperties": false
@@ -3994,6 +4020,735 @@
             "in": "path"
           }
         ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/v1/platform/custom-fields": {
+      "get": {
+        "tags": [
+          "Customisation"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Custom fields of an entity",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*\\.[a-z][a-z0-9_]*$"
+            },
+            "required": true,
+            "name": "entity",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Customisation"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Define a custom field",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "entity": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9_]*\\.[a-z][a-z0-9_]*$"
+                  },
+                  "apiName": {
+                    "type": "string",
+                    "maxLength": 40
+                  },
+                  "dataType": {
+                    "type": "string",
+                    "enum": [
+                      "text",
+                      "long_text",
+                      "integer",
+                      "decimal",
+                      "boolean",
+                      "date",
+                      "datetime",
+                      "select",
+                      "multi_select",
+                      "email",
+                      "url",
+                      "phone",
+                      "reference"
+                    ]
+                  },
+                  "label": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string",
+                      "maxLength": 200
+                    }
+                  },
+                  "help": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string",
+                      "maxLength": 200
+                    }
+                  },
+                  "required": {
+                    "type": "boolean"
+                  },
+                  "defaultValue": {},
+                  "options": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        },
+                        "label": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "string",
+                            "maxLength": 200
+                          }
+                        }
+                      },
+                      "required": [
+                        "value",
+                        "label"
+                      ]
+                    },
+                    "maxItems": 200
+                  },
+                  "settings": {
+                    "type": "object",
+                    "additionalProperties": {}
+                  },
+                  "position": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000
+                  }
+                },
+                "required": [
+                  "entity",
+                  "apiName",
+                  "dataType",
+                  "label"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/v1/platform/custom-fields/{id}": {
+      "patch": {
+        "tags": [
+          "Customisation"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Change or archive a custom field",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string",
+                      "maxLength": 200
+                    }
+                  },
+                  "help": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "additionalProperties": {
+                      "type": "string",
+                      "maxLength": 200
+                    }
+                  },
+                  "required": {
+                    "type": "boolean"
+                  },
+                  "defaultValue": {},
+                  "options": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        },
+                        "label": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "string",
+                            "maxLength": 200
+                          }
+                        }
+                      },
+                      "required": [
+                        "value",
+                        "label"
+                      ]
+                    },
+                    "maxItems": 200
+                  },
+                  "position": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "active",
+                      "archived"
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/v1/platform/custom-objects": {
+      "get": {
+        "tags": [
+          "Customisation"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Custom objects",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Customisation"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Define a custom object",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "apiName": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9_]{2,39}$"
+                  },
+                  "label": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string",
+                      "maxLength": 200
+                    }
+                  },
+                  "pluralLabel": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string",
+                      "maxLength": 200
+                    }
+                  },
+                  "description": {
+                    "type": "string",
+                    "maxLength": 1000
+                  },
+                  "companyScoped": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "apiName",
+                  "label",
+                  "pluralLabel"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/v1/platform/custom-objects/{id}": {
+      "patch": {
+        "tags": [
+          "Customisation"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Change a custom object",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string",
+                      "maxLength": 200
+                    }
+                  },
+                  "pluralLabel": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string",
+                      "maxLength": 200
+                    }
+                  },
+                  "description": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "maxLength": 1000
+                  },
+                  "titleField": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "maxLength": 40
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "active",
+                      "archived"
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/v1/platform/custom-objects/{apiName}/records": {
+      "get": {
+        "tags": [
+          "Customisation"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List records (filters: data.<field>=v, data.<field>[gte]=v)",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]{2,39}$"
+            },
+            "required": true,
+            "name": "apiName",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Customisation"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a record",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]{2,39}$"
+            },
+            "required": true,
+            "name": "apiName",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "companyId": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "uuid"
+                  },
+                  "data": {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                },
+                "required": [
+                  "data"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/v1/platform/custom-objects/{apiName}/records/export.csv": {
+      "get": {
+        "tags": [
+          "Customisation"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Export records as CSV",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]{2,39}$"
+            },
+            "required": true,
+            "name": "apiName",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/v1/platform/custom-objects/{apiName}/records/{id}": {
+      "get": {
+        "tags": [
+          "Customisation"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a record",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]{2,39}$"
+            },
+            "required": true,
+            "name": "apiName",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Customisation"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a record (merge; null clears)",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]{2,39}$"
+            },
+            "required": true,
+            "name": "apiName",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                },
+                "required": [
+                  "data"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/v1/platform/custom-objects/{apiName}/records/{id}/archive": {
+      "post": {
+        "tags": [
+          "Customisation"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Archive a record",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]{2,39}$"
+            },
+            "required": true,
+            "name": "apiName",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/v1/platform/layouts/{entity}/{kind}": {
+      "get": {
+        "tags": [
+          "Customisation"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Form or list layout",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*\\.[a-z][a-z0-9_]*$"
+            },
+            "required": true,
+            "name": "entity",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "form",
+                "list"
+              ]
+            },
+            "required": true,
+            "name": "kind",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Customisation"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Save a form or list layout",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*\\.[a-z][a-z0-9_]*$"
+            },
+            "required": true,
+            "name": "entity",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "form",
+                "list"
+              ]
+            },
+            "required": true,
+            "name": "kind",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "layout": {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                },
+                "required": [
+                  "layout"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK"

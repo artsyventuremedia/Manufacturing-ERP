@@ -12,6 +12,8 @@ export interface Plant {
   readonly timezone: string;
   readonly status: PlantStatus;
   readonly version: number;
+  /** Custom field values (validated against field definitions, step 0.9). */
+  readonly ext: Readonly<Record<string, unknown>>;
 }
 
 export interface NewPlant {
@@ -32,6 +34,7 @@ export function createPlant(company: { id: string; countryCode: string }, input:
     timezone: parseTimezone(input.timezone),
     status: 'active',
     version: 1,
+    ext: {},
   };
 }
 

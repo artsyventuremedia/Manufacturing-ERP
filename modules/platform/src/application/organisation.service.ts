@@ -18,7 +18,14 @@ import {
   type PlantRecord,
 } from '../infrastructure/organisation.repository.js';
 import { ChangeLog } from './change-log.js';
+import { CustomisationService } from './customisation.service.js';
+import { ExtensionService } from './extensions.js';
+import { type ExtValues } from '../domain/custom-fields.js';
+import { filterSql } from '../infrastructure/customisation.repository.js';
 import { companySnapshot, fiscalYearSnapshot, plantSnapshot } from './snapshots.js';
+
+const COMPANY = 'platform.company';
+const PLANT = 'platform.plant';
 
 /**
  * Use cases for the organisation structure (company → plant) and fiscal calendars.
@@ -32,28 +39,48 @@ export class OrganisationService {
     private readonly uow: UnitOfWork,
     private readonly repo: OrganisationRepository,
     private readonly changes: ChangeLog,
+    private readonly extensions: ExtensionService,
   ) {}
 
-  listCompanies(limit: number, after?: readonly [string, string]): Promise<CompanyRecord[]> {
+  listCompanies(
+    limit: number,
+    after?: readonly [string, string],
+    query: Readonly<Record<string, unknown>> = {},
+  ): Promise<CompanyRecord[]> {
     const { companyIds } = RequestContexts.requireTenant();
     return this.uow.run(
       async () => {
-        const rows = await this.repo.listCompanies(companyIds, limit, after);
-        return rows.filter((c) => AccessControl.can(P.companyRead, { companyId: c.id }));
+        const filters = await this.extensions.filters(COMPANY, query, 'ext');
+        CustomisationService.assertFilterable(COMPANY, filters);
+        const rows = await this.repo.listCompanies(
+          companyIds,
+          limit,
+          after,
+          filterSql('ext', filters),
+        );
+        return this.present(
+          COMPANY,
+          rows.filter((c) => AccessControl.can(P.companyRead, { companyId: c.id })),
+        );
       },
       { readOnly: true },
     );
   }
 
   getCompany(id: string): Promise<CompanyRecord> {
-    return this.uow.run(() => this.readableCompany(id, P.companyRead), { readOnly: true });
+    return this.uow.run(
+      async () =>
+        (await this.present(COMPANY, [await this.readableCompany(id, P.companyRead)]))[0]!,
+      { readOnly: true },
+    );
   }
 
-  createCompany(input: NewCompany): Promise<CompanyRecord> {
+  createCompany(input: NewCompany & { ext?: unknown }): Promise<CompanyRecord> {
     AccessControl.assert(P.companyCreate);
     const company = createCompany(input);
     return this.uow.run(async () => {
-      const saved = await this.repo.insertCompany(company);
+      const ext = await this.extensions.prepare(COMPANY, input.ext ?? {}, undefined);
+      const saved = await this.repo.insertCompany({ ...company, ext });
       const after = companySnapshot(saved);
       await this.changes.record({
         entityType: 'platform.company',
@@ -62,20 +89,21 @@ export class OrganisationService {
         after,
         event: { type: 'platform.CompanyCreated.v1', aggregateType: 'Company', data: after },
       });
-      return saved;
+      return (await this.present(COMPANY, [saved]))[0]!;
     });
   }
 
   updateCompany(
     id: string,
     expectedVersion: number,
-    changes: CompanyChanges,
+    changes: CompanyChanges & { ext?: unknown },
   ): Promise<CompanyRecord> {
     return this.uow.run(async () => {
       const current = await this.readableCompany(id, P.companyUpdate);
       const hasFiscalYears = await this.repo.hasFiscalYears(id);
+      const ext = await this.extensions.prepare(COMPANY, changes.ext, current.ext as ExtValues);
       const saved = await this.repo.updateCompany(
-        changeCompany(current, changes, hasFiscalYears),
+        { ...changeCompany(current, changes, hasFiscalYears), ext },
         expectedVersion,
       );
       const after = companySnapshot(saved);
@@ -87,7 +115,7 @@ export class OrganisationService {
         after,
         event: { type: 'platform.CompanyChanged.v1', aggregateType: 'Company', data: after },
       });
-      return saved;
+      return (await this.present(COMPANY, [saved]))[0]!;
     });
   }
 
@@ -96,20 +124,27 @@ export class OrganisationService {
       async () => {
         this.assertVisible(companyId);
         const plants = await this.repo.listPlants(companyId);
-        return plants.filter((p) => AccessControl.can(P.plantRead, { companyId, plantId: p.id }));
+        return this.present(
+          PLANT,
+          plants.filter((p) => AccessControl.can(P.plantRead, { companyId, plantId: p.id })),
+        );
       },
       { readOnly: true },
     );
   }
 
   getPlant(id: string): Promise<PlantRecord> {
-    return this.uow.run(() => this.readablePlant(id, P.plantRead), { readOnly: true });
+    return this.uow.run(
+      async () => (await this.present(PLANT, [await this.readablePlant(id, P.plantRead)]))[0]!,
+      { readOnly: true },
+    );
   }
 
-  createPlant(companyId: string, input: NewPlant): Promise<PlantRecord> {
+  createPlant(companyId: string, input: NewPlant & { ext?: unknown }): Promise<PlantRecord> {
     return this.uow.run(async () => {
       const company = await this.readableCompany(companyId, P.plantCreate);
-      const saved = await this.repo.insertPlant(createPlant(company, input));
+      const ext = await this.extensions.prepare(PLANT, input.ext ?? {}, undefined);
+      const saved = await this.repo.insertPlant({ ...createPlant(company, input), ext });
       const after = plantSnapshot(saved);
       await this.changes.record({
         entityType: 'platform.plant',
@@ -118,17 +153,22 @@ export class OrganisationService {
         after,
         event: { type: 'platform.PlantCreated.v1', aggregateType: 'Plant', data: after },
       });
-      return saved;
+      return (await this.present(PLANT, [saved]))[0]!;
     });
   }
 
-  updatePlant(id: string, expectedVersion: number, changes: PlantChanges): Promise<PlantRecord> {
+  updatePlant(
+    id: string,
+    expectedVersion: number,
+    changes: PlantChanges & { ext?: unknown },
+  ): Promise<PlantRecord> {
     return this.uow.run(async () => {
       const plant = await this.readablePlant(id, P.plantUpdate);
       const company = await this.repo.findCompany(plant.companyId);
       if (!company) throw new NotFoundError('Company', plant.companyId);
+      const ext = await this.extensions.prepare(PLANT, changes.ext, plant.ext as ExtValues);
       const saved = await this.repo.updatePlant(
-        changePlant(plant, company.countryCode, changes),
+        { ...changePlant(plant, company.countryCode, changes), ext },
         expectedVersion,
       );
       const after = plantSnapshot(saved);
@@ -140,7 +180,7 @@ export class OrganisationService {
         after,
         event: { type: 'platform.PlantChanged.v1', aggregateType: 'Plant', data: after },
       });
-      return saved;
+      return (await this.present(PLANT, [saved]))[0]!;
     });
   }
 
@@ -171,6 +211,19 @@ export class OrganisationService {
       });
       return saved;
     });
+  }
+
+  /** Hides archived and policy-hidden custom fields (plan C4). */
+  private async present<T extends { ext: Readonly<Record<string, unknown>> }>(
+    entity: string,
+    rows: T[],
+  ): Promise<T[]> {
+    if (rows.length === 0) return rows;
+    const defs = await this.extensions.defs(entity);
+    return rows.map((r) => ({
+      ...r,
+      ext: this.extensions.present(entity, r.ext as ExtValues, defs),
+    }));
   }
 
   private assertVisible(companyId: string): void {
