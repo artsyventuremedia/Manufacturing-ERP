@@ -324,3 +324,28 @@ describe('append-only ledgers', () => {
     await expect(admin.query('TRUNCATE demo.ledger')).rejects.toMatchObject({ code: 'MN001' });
   });
 });
+
+describe('pool', () => {
+  it('survives an idle connection being terminated by the server', async () => {
+    const errors: Error[] = [];
+    const p = createPool({
+      connectionString: server.urlFor('manuling_db_test', 'mnl_app', 'app'),
+      max: 1,
+      applicationName: 'manuling-idle-test',
+      onIdleError: (err) => errors.push(err),
+    });
+    try {
+      await p.query('SELECT 1'); // leaves one idle client in the pool
+      await admin.query(
+        `SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE application_name = 'manuling-idle-test'`,
+      );
+      for (let i = 0; i < 50 && errors.length === 0; i++)
+        await new Promise((r) => setTimeout(r, 20));
+      expect(errors[0]).toMatchObject({ code: '57P01' });
+      // The broken client was discarded; the next query gets a fresh connection.
+      expect((await p.query<{ ok: number }>('SELECT 1 AS ok')).rows[0]?.ok).toBe(1);
+    } finally {
+      await p.end();
+    }
+  });
+});

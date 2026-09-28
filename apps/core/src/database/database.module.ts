@@ -1,6 +1,13 @@
 import { AuditTrail, UnitOfWork, createPool } from '@manuling/db';
 import { EventOutbox } from '@manuling/events';
-import { Global, Inject, Injectable, Module, type OnApplicationShutdown } from '@nestjs/common';
+import {
+  Global,
+  Inject,
+  Injectable,
+  Logger,
+  Module,
+  type OnApplicationShutdown,
+} from '@nestjs/common';
 import type pg from 'pg';
 import { APP_CONFIG, type AppConfig } from '../config/config.js';
 
@@ -25,6 +32,10 @@ class PoolLifecycle implements OnApplicationShutdown {
  * and outbox writers that join its transactions. Modules must use UnitOfWork; direct
  * PG_POOL access is reserved for infrastructure such as health checks.
  */
+const idleLogger = new Logger('Database');
+const idleError = (err: Error) =>
+  idleLogger.warn({ err, msg: 'idle database connection closed; the pool will reconnect' });
+
 @Global()
 @Module({
   providers: [
@@ -36,6 +47,7 @@ class PoolLifecycle implements OnApplicationShutdown {
           connectionString: config.database.url,
           max: config.database.poolMax,
           applicationName: 'manuling-core',
+          onIdleError: idleError,
         }),
     },
     {
@@ -46,6 +58,7 @@ class PoolLifecycle implements OnApplicationShutdown {
           connectionString: config.database.url,
           max: Math.max(2, Math.ceil(config.database.poolMax / 4)),
           applicationName: 'manuling-core-independent',
+          onIdleError: idleError,
         }),
     },
     {

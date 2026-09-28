@@ -4,6 +4,10 @@ All notable changes to this project are documented here. Format: [Keep a Changel
 
 ## [Unreleased]
 
+### Fixed
+
+- A database connection dropped while idle (server restart, failover, `57P01`) no longer crashes the process. `createPool` always listens for pool errors, and core logs them. This showed up as a flaky CI teardown.
+
 ### Added
 
 - Brief v2 architecture deliverables (awaiting approval): `docs/BRIEF-v2.md` (the brief as received) and `docs/architecture/05–13`:

@@ -109,6 +109,8 @@ class WorkerRuntime implements OnApplicationBootstrap, OnApplicationShutdown {
       connectionString: relayDatabaseUrl,
       max: 3,
       applicationName: 'manuling-outbox-relay',
+      onIdleError: (err) =>
+        this.logger.warn({ err, msg: 'idle relay connection closed; the pool will reconnect' }),
     });
     this.relay = new OutboxRelay(this.relayPool, this.publisher, {}, this.pinoAdapter());
     this.relay.start();
